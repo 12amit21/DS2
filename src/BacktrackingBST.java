@@ -82,7 +82,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
         }
         Object[] array = new Object[2]; //for backtracking
         array[0] = true;
-        array[1] = node;
+        array[1] = copyNode(node);
         stack.push(array);
     }
 
@@ -91,14 +91,22 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
         emptyRedoStack();
     }
 
+    public Node copyNode(Node node){
+        Node copy=new Node(node.getKey(),node.value);
+        copy.setParent(node.getParent());
+        copy.left=node.left;
+        copy.right=node.right;
+        return copy;
+    }
+
     private void reTrackDelete(Node node){
-        Object[]arr=new Object[3];
-        arr[0]=false;
-        arr[2]=null;
         if (node == null)
             throw new IllegalArgumentException("Node is null");
         if (search(node.getKey()) == null)
             throw new IllegalArgumentException("Node doesn't exist in the tree");
+        Object[]arr=new Object[3];
+        arr[0]=false;
+        arr[1]=copyNode(node);
         if (node.left == null & node.right == null) { //if the node is a leaf
             if (node.getParent() == null) //if node is root
                 root = null;
@@ -110,8 +118,8 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             }
         } else if (node.left != null & node.right == null) { //if has only left son
             if (node.getParent() == null) { //if node is root
-                root.left = node.left;
-                node.left.setParent(root);
+                root = node.left;
+                node.left.setParent(null);
             } else {
                 if (node.getParent().left!=null && node.getParent().left.getKey() == node.getKey()) //deciding if node is a right/left son
                     node.getParent().left = node.left;
@@ -121,8 +129,8 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             }
         } else if (node.left == null & node.right != null) { //if has only right son
             if (node.getParent() == null) { //if node is root
-                root.right = node.right;
-                node.right.setParent(root);
+                root = node.right;
+                node.right.setParent(null);
             } else { //deciding if node is a right/left son
                 if (node.getParent().right!=null && node.getParent().right.getKey() == node.getKey())
                     node.getParent().right = node.right;
@@ -132,8 +140,8 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             }
         } else { //if has 2 sons
             Node succ = successor(node);
-            arr[2]=succ;
-            delete(succ);//recursion is at most 2 times, doesn't depend on the input's size
+            arr[2]=copyNode(succ);
+            reTrackDelete(succ);//recursion is at most 2 times, doesn't depend on the input's size
             succ.left = node.left;
             succ.right = node.right;
             succ.setParent(node.getParent());
@@ -145,8 +153,10 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                 else
                     node.getParent().left = succ;
             }
+            node.left.setParent(succ);
+            if(node.right!=null)
+                node.right.setParent(succ);
         }
-        arr[1]=node;
         stack.push(arr);
     }
 
@@ -193,7 +203,6 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                         throw new RuntimeException("Node doesn't have a successor");
                     return tmp.getParent();
                 }
-
             }
         }
     }
@@ -257,20 +266,18 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                     node.right.setParent(node);
                 }
                 else{//node has two sons
-                    Node succ=node.left.getParent();
-                    if(succ.parent.left==succ)
-                        succ.parent.left=node;
-                    else
-                        succ.parent.right=node;
+                    Node succ=(Node)arr[2];
                     node.left.setParent(node);
-                    node.right.setParent(node);
-                    Node prevSucc=(Node)arr[2];
-                    if(prevSucc.right==null)
-                        reTrackInsert(prevSucc);
-                    else{
-                        prevSucc.getParent().left=prevSucc;
-                        prevSucc.right.setParent(prevSucc);
-                    }
+                    if(node.getParent()!= null && node.getParent().left.getKey()==succ.getKey())
+                        node.getParent().left=node;
+                    else if(node.getParent()!= null)
+                        node.getParent().right=node;
+                    else
+                        root=node;
+                    if(node.right.getKey()!=succ.getKey())
+                        succ.getParent().left=succ;
+                    else
+                        node.right=succ;
                 }
             }
         }
@@ -278,14 +285,14 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
 
     @Override
     public void retrack() {
-        if (!redoStack.isEmpty()) {
-            Object[] arr = (Object[]) redoStack.pop();
-            if((boolean)arr[0])
-                reTrackInsert((Node)arr[1]);
-            else{
-
-            }
-        }
+//        if (!redoStack.isEmpty()) {
+//            Object[] arr = (Object[]) redoStack.pop();
+//            if((boolean)arr[0])
+//                reTrackInsert((Node)arr[1]);
+//            else{
+//
+//            }
+//        }
     }
 
     private void emptyRedoStack(){
