@@ -44,6 +44,10 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
 
     public void insert(Node node) { //inserts node according to BST logic
         reTrackInsert(node);
+        Object[] array = new Object[2]; //for backtracking
+        array[0] = true;
+        array[1] = copyNode(node);
+        stack.push(array);
         emptyRedoStack();
     }
 
@@ -80,10 +84,6 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                 node.setParent(tmp);
             }
         }
-        Object[] array = new Object[2]; //for backtracking
-        array[0] = true;
-        array[1] = copyNode(node);
-        stack.push(array);
     }
 
     public void delete(Node node) { //deletes the specified node from the tree
@@ -252,17 +252,23 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                 if(node.right==null & node.left==null)//node is a leaf
                     reTrackInsert(node);
                 else if(node.right==null & node.left!=null){//node has a left son
-                    if(node.parent.right==node.left)
+                    if(node.parent!=null && node.parent.right==node.left)
                         node.parent.right=node;
-                    else
+                    else if(node.parent!=null)
                         node.parent.left=node;
+                    else
+                        root=node;
                     node.left.setParent(node);
                 }
                 else if(node.right!=null & node.left==null){// node has a right son
-                    if(node.parent.right==node.right)
+                    if(node.parent!=null && node.parent.right==node.right)
                         node.parent.right=node;
-                    else
+                    else if(node.parent!=null)
                         node.parent.left=node;
+                    else
+                        root=node;
+                    if(node.parent!=null && node.parent.getParent()==null)
+                        root=node.parent;
                     node.right.setParent(node);
                 }
                 else{//node has two sons
