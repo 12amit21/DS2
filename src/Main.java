@@ -39,8 +39,7 @@ public class Main {
         myArr.backtrack();
         myArr.print();
         myArr.backtrack();
+        //System.out.println(myArr.getRoot().right.getKey());
         myArr.print();
-
-
     }
 }
