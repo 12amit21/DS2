@@ -1,6 +1,4 @@
-
 import org.w3c.dom.Node;
-
 import javax.swing.*;
 import java.sql.SQLOutput;
 import java.util.NoSuchElementException;
@@ -50,10 +48,10 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
         array[1] = node;
         stack.push(array);
         reTrackInsert(node);
-        emptyRedoStack();
+        emptyRedoStack();//after every insert the redoStack should be empty
     }
 
-    public void reTrackInsert(Node node){
+    public void reTrackInsert(Node node) {//using reTrackInsert to avoid using emptyRedoStack in every insert
         if (root == null) { //tree's empty, insert as root
             root = node;
             root.setParent(null);
@@ -91,27 +89,25 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             throw new IllegalArgumentException("Node is null");
         if (search(node.getKey()) == null)
             throw new IllegalArgumentException("Node doesn't exist in the tree");
-        Object[]arr=new Object[4];
-        arr[0]=false;
-        arr[1]=node;
-        try {
+        Object[] arr = new Object[4];//for backtracking
+        arr[0] = false;
+        arr[1] = node;
+        try {//not every deleted node have a successor
             Node succ = successor(node);
-            arr[2]=succ;
-            arr[3]=succ.getParent();
-        }
-        catch(RuntimeException e){};
-
+            arr[2] = succ;
+            arr[3] = succ.getParent();
+        } catch (RuntimeException e) { };
         stack.push(arr);
         reTrackDelete(node);
         emptyRedoStack();
     }
 
-    private void reTrackDelete(Node node){
+    private void reTrackDelete(Node node) {//using reTrackDelete to avoid using emptyRedoStack in every deletion
         if (node.left == null & node.right == null) { //if the node is a leaf
             if (node.getParent() == null) //if node is root
                 root = null;
             else {
-                if (node.getParent().left!=null && node.getParent().left.getKey() == node.getKey())
+                if (node.getParent().left != null && node.getParent().left.getKey() == node.getKey())
                     node.getParent().left = null;
                 else
                     node.getParent().right = null;
@@ -121,7 +117,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                 root = node.left;
                 node.left.setParent(null);
             } else {
-                if (node.getParent().left!=null && node.getParent().left.getKey() == node.getKey()) //deciding if node is a right/left son
+                if (node.getParent().left != null && node.getParent().left.getKey() == node.getKey()) //deciding if node is a right/left son
                     node.getParent().left = node.left;
                 else
                     node.getParent().right = node.left;
@@ -132,7 +128,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                 root = node.right;
                 node.right.setParent(null);
             } else { //deciding if node is a right/left son
-                if (node.getParent().right!=null && node.getParent().right.getKey() == node.getKey())
+                if (node.getParent().right != null && node.getParent().right.getKey() == node.getKey())
                     node.getParent().right = node.right;
                 else
                     node.getParent().left = node.right;
@@ -140,7 +136,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             }
         } else { //if has 2 sons
             Node succ = successor(node);
-            if(node.right.getKey()!=succ.getKey()) {
+            if (node.right.getKey() != succ.getKey()) {//split cases in which the successor is the node's son
                 reTrackDelete(succ);//recursion is at most 2 times, doesn't depend on the input's size
                 succ.right = node.right;
             }
@@ -149,13 +145,13 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             if (node.getParent() == null) //if node is root
                 root = succ;
             else {
-                if (node.getParent().right!=null && node.getParent().right.getKey() == node.getKey()) //deciding if node is a right/left son
+                if (node.getParent().right != null && node.getParent().right.getKey() == node.getKey()) //deciding if node is a right/left son
                     node.getParent().right = succ;
                 else
                     node.getParent().left = succ;
             }
             node.left.setParent(succ);
-            if(node.right!=null & node.right!=succ)
+            if (node.right != null & node.right != succ)
                 node.right.setParent(succ);
         }
     }
@@ -169,11 +165,11 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
         return tmp;
     }
 
-    public Node maximum() { //gets the minimum node in the tree
+    public Node maximum() { //gets the maximum node in the tree
         if (root == null)
             throw new RuntimeException("Root is null");
         Node tmp = root;
-        while (tmp.right != null) //going down right, in BST, minimum will be the rightmost son
+        while (tmp.right != null) //going down right, in BST, maximum will be the rightmost son
             tmp = tmp.right;
         return tmp;
     }
@@ -237,53 +233,49 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
     }
 
     @Override
-    public void backtrack() {
+    public void backtrack() {//undo the last insert/delete action
         if (!stack.isEmpty()) {
             Object[] arr = (Object[]) stack.pop();
-            redoStack.push(arr);
+            redoStack.push(arr);//pushing to the redoStack for retracking
             Node node = (Node) arr[1];
             if ((boolean) arr[0]) {// if last action was insert
-                if (node.getParent()!=null && node.getParent().left == node)
+                if (node.getParent() != null && node.getParent().left == node)
                     node.getParent().left = null;
-                else if(node.getParent()!=null)
+                else if (node.getParent() != null)
                     node.getParent().right = null;
                 else
-                    root=null;
+                    root = null;
                 node.setParent(null);
-                redoStack.push(arr);
-            } else {//last action was delete
+            } else {//if last action was delete
                 if (node.right == null & node.left == null)//node is a leaf
                     reTrackInsert(node);
                 else {//node has one son
                     if (node.parent != null && node.parent.getKey() < node.getKey()) {
                         node.parent.right = node;
-                    }
-                    else if (node.parent != null && node.parent.getKey() > node.getKey()) {
+                    } else if (node.parent != null && node.parent.getKey() > node.getKey()) {
                         node.parent.left = node;
-                    }
-                    else
+                    } else
                         root = node;
                     if (node.left != null)
                         node.left.setParent(node);
                     if (node.right != null)
                         node.right.setParent(node);
-                    if(node.right != null & node.left != null) {//node has two sons
+                    if (node.right != null & node.left != null) {//node has two sons
                         Node succ = (Node) arr[2];
-                        succ.left=null;
+                        succ.left = null;
                         if (node.right.getKey() != succ.getKey()) {//finding the place of the successor
-                            Node succP =node.right;
-                            while (succP.getKey() != ((Node)arr[3]).getKey())
+                            Node succP = node.right;
+                            while (succP.getKey() != ((Node) arr[3]).getKey())//finding the original node's parent
                                 succP = succP.left;
-                            if(succP.left!=null) {
+                            if (succP.left != null) {
                                 succP.left.setParent(succ);
                                 succ.right = succP.left;
                             }
                             succP.left = succ;
                             succ.setParent(succP);
-                        }
-                        else {
+                        } else {
                             succ.setParent(node);
-                            if(succ.right!=null)
+                            if (succ.right != null)
                                 succ.right.setParent(succ);
                             node.right = succ;
                         }
@@ -294,19 +286,19 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
     }
 
     @Override
-    public void retrack() {
+    public void retrack() {//redo the last undo action
         if (!redoStack.isEmpty()) {
             Object[] arr = (Object[]) redoStack.pop();
-            if((boolean)arr[0])
-                reTrackInsert((Node)arr[1]);
-            else{
-
+            if ((boolean) arr[0])//the last undo action was insert
+                reTrackInsert((Node) arr[1]);
+            else {//the last undo action was delete
+                reTrackDelete((Node) arr[1]);
             }
         }
     }
 
-    private void emptyRedoStack(){
-        while(!redoStack.isEmpty())
+    private void emptyRedoStack() {//empty the 'redoStack'
+        while (!redoStack.isEmpty())
             redoStack.pop();
     }
 
@@ -340,7 +332,9 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             this.value = value;
         }
 
-        public void setParent(Node parent) {this.parent = parent;}
+        public void setParent(Node parent) {
+            this.parent = parent;
+        }
 
         public Node getParent() {
             return parent;
