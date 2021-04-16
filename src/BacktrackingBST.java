@@ -249,7 +249,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
             } else {//if last action was delete
                 if (node.right == null & node.left == null)//node is a leaf
                     reTrackInsert(node);
-                else {//node has one son
+                else {//node has at least one son
                     if (node.parent != null && node.parent.getKey() < node.getKey()) {
                         node.parent.right = node;
                     } else if (node.parent != null && node.parent.getKey() > node.getKey()) {
@@ -267,10 +267,9 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                             Node succP = node.right;
                             while (succP.getKey() != ((Node) arr[3]).getKey())//finding the original node's parent
                                 succP = succP.left;
-                            if (succP.left != null) {
+                            if (succP.left != null)
                                 succP.left.setParent(succ);
-                                succ.right = succP.left;
-                            }
+                            succ.right = succP.left;
                             succP.left = succ;
                             succ.setParent(succP);
                         } else {
