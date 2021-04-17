@@ -77,14 +77,14 @@ public class Question4 {
         // answer = "O(log(log(n)))";
         // answer = "O(log(n))";
         // answer = "O(sqrt(n))"; // sqrt is an abbreviation for square root
-        // answer = "O(n)";
+        answer = "O(n)";
         return answer;
     }
 
     public static String section_vi() {
         String answer = null;
         // answer = "No additional memory is needed";
-        // answer = "O(1)";
+        answer = "O(1)";
         // answer = "O(log(log(n)))";
         // answer = "O(log(n))";
         // answer = "O(sqrt(n))"; // sqrt is an abbreviation for square root
