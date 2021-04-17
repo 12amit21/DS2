@@ -264,9 +264,11 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
                         Node succ = (Node) arr[2];
                         succ.left = null;
                         if (node.right.getKey() != succ.getKey()) {//finding the place of the successor
-                            Node succP = node.right;
-                            while (succP.getKey() != ((Node) arr[3]).getKey())//finding the original node's parent
-                                succP = succP.left;
+//                            Node succP = node.right;
+//
+//                            while (succP.getKey() != ((Node) arr[3]).getKey())//finding the original node's parent
+//                                succP = succP.left;
+                            Node succP=(Node)arr[3];
                             if (succP.left != null)
                                 succP.left.setParent(succ);
                             succ.right = succP.left;
