@@ -286,6 +286,7 @@ public class BacktrackingBST implements Backtrack, ADTSet<BacktrackingBST.Node> 
     public void retrack() {//redo the last undo action
         if (!redoStack.isEmpty()) {
             Object[] arr = (Object[]) redoStack.pop();
+            stack.push(arr);
             if ((boolean) arr[0])//the last undo action was insert
                 reTrackInsert((Node) arr[1]);
             else {//the last undo action was delete
